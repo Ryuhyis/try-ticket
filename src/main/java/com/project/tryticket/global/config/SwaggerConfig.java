@@ -1,0 +1,40 @@
+package com.project.tryticket.global.config;
+
+import io.swagger.v3.oas.annotations.OpenAPIDefinition;
+import io.swagger.v3.oas.annotations.info.Info;
+import io.swagger.v3.oas.models.Components;
+import io.swagger.v3.oas.models.OpenAPI;
+import io.swagger.v3.oas.models.security.SecurityRequirement;
+import io.swagger.v3.oas.models.security.SecurityScheme;
+import lombok.RequiredArgsConstructor;
+import org.springdoc.core.models.GroupedOpenApi;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+@OpenAPIDefinition(
+        info = @Info(title = "TryTicket API",
+                description = "TryTicket API명세",
+                version = "v1"))
+@RequiredArgsConstructor
+@Configuration
+public class SwaggerConfig {
+   @Bean
+   public GroupedOpenApi publicApi() {
+      return GroupedOpenApi.builder()
+              .group("TryTicket API v1")
+              .pathsToMatch("/v1/**")
+              .build();
+   }
+
+   @Bean
+   public OpenAPI springOpenAPI() {
+
+      SecurityScheme bearerAuth = new SecurityScheme().type(SecurityScheme.Type.HTTP).scheme("bearer").bearerFormat("JWT")
+              .in(SecurityScheme.In.HEADER).name("Authorization");
+      SecurityRequirement securityItem = new SecurityRequirement().addList("bearerAuth");
+
+      return new OpenAPI()
+              .components(new Components().addSecuritySchemes("bearerAuth", bearerAuth))
+              .addSecurityItem(securityItem);
+   }
+
+}
