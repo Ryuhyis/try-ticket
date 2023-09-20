@@ -3,7 +3,6 @@ package com.project.tryticket.domain.practice.service;
 import com.project.tryticket.domain.practice.dto.PracticeSetupDTO;
 import com.project.tryticket.domain.practice.entity.Practice;
 import com.project.tryticket.domain.practice.repository.PracticeRepository;
-import com.project.tryticket.domain.ticketEvent.model.TicketEvent;
 import com.project.tryticket.redis.RedisService;
 import com.project.tryticket.schedule.SchedulerService;
 import lombok.RequiredArgsConstructor;
