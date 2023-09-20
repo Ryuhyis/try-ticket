@@ -2,7 +2,8 @@ package com.project.tryticket.redis;
 
 import com.project.tryticket.domain.seat.SeatService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.dao.DataAccessException;
+import org.springframework.data.redis.core.*;
 import org.springframework.stereotype.Service;
 
 import java.util.Random;
@@ -42,18 +43,23 @@ public class RedisService {
     * @return
     */
    public void moveUsersToActionQueue(String eventId) {
-      Set<Object> usersToMove = redisTemplate.opsForZSet().range("waiting:" + eventId, 0, 10); // 예: 상위 5명의 사용자를 가져옴
-      for (Object user : usersToMove) {
-         String userId = (String) user;
-         // 사용자를 작업 대기열로 이동
-         redisTemplate.opsForZSet().add("actionQueue:" + eventId, (String) user, System.currentTimeMillis());
-         redisTemplate.opsForZSet().remove("waiting:" + eventId, user); // 사용자를 대기열에서 제거
+      redisTemplate.execute(new SessionCallback<Object>() {
+         @Override
+         public Object execute(RedisOperations operations) throws DataAccessException {
+            operations.multi(); // transaction start
+            Set<Object> usersToMove = redisTemplate.opsForZSet().range("waiting:" + eventId, 0, 10); // 상위 5명의 사용자를 가져옴
+            for (Object user : usersToMove) {
+               String userId = (String) user;
+               redisTemplate.opsForZSet().add("actionQueue:" + eventId, userId, System.currentTimeMillis());
+               redisTemplate.opsForZSet().remove("waiting:" + eventId, user); // 사용자를 대기열에서 제거
 
-         // 가상 사용자면 자동으로 랜덤 좌석 예매 로직 호출
-         if (userId.startsWith("virtualUser")) {
-            reserveRandomSeat(eventId, userId);
+               if (userId.startsWith("virtualUser")) {
+                  seatService.randomReserveSeat(eventId, userId);
+               }
+            }
+            return operations.exec(); // transaction end
          }
-      }
+      });
    }
 
    public void reserveRandomSeat(String eventId, String userId) {

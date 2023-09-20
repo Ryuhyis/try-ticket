@@ -10,8 +10,12 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.repository.configuration.EnableRedisRepositories;
 import org.springframework.data.redis.serializer.Jackson2JsonRedisSerializer;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
+import org.springframework.orm.jpa.JpaTransactionManager;
+import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 @Configuration
+@EnableTransactionManagement
 //@EnablxeRedisRepositories
 public class RedisConfig {
    @Value("${spring.redis.host}")
@@ -39,6 +43,8 @@ public class RedisConfig {
 
       template.setKeySerializer(new StringRedisSerializer());
       template.setValueSerializer(new Jackson2JsonRedisSerializer<>(String.class));
+      template.setEnableTransactionSupport(true);  // 설정 필요한 부분
+
 
       return template;
    }
@@ -53,5 +59,10 @@ public class RedisConfig {
       stringRedisTemplate.setValueSerializer(new StringRedisSerializer());
       stringRedisTemplate.setConnectionFactory(redisConnectionFactory());
       return stringRedisTemplate;
+   }
+
+   @Bean
+   public PlatformTransactionManager transactionManager() { // <=
+      return new JpaTransactionManager(); // <=
    }
 }
