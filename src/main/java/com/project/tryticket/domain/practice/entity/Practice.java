@@ -19,7 +19,7 @@ public class Practice {
    @ManyToOne
    @JoinColumn(name = "userID")
    private User user;
-   private LocalDateTime startTime;
+   private int startTime;
    private String difficultyLevel;
    private LocalDateTime createDateTime;
    private LocalDateTime updateDateTime;

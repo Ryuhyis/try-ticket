@@ -1,7 +1,9 @@
 package com.project.tryticket.domain.practice.controller;
 
 import com.project.tryticket.domain.practice.dto.PracticeSetupDTO;
-import com.project.tryticket.service.PracticeService;
+import com.project.tryticket.domain.practice.entity.Practice;
+import com.project.tryticket.domain.practice.service.PracticeService;
+import com.project.tryticket.domain.seat.SeatService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -12,14 +14,16 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 public class PracticeController {
    private final PracticeService practiceService;
+   private final SeatService seatService;
 
    /**
     * 연습 티켓팅 세팅
     */
    @PostMapping("/setting")
-   public ResponseEntity<Void> setupPractice(@RequestBody PracticeSetupDTO practiceSetupDTO) {
-      practiceService.setupPractice(practiceSetupDTO);
-      return ResponseEntity.ok().build();
+   public ResponseEntity<Long> setupPractice(@RequestBody PracticeSetupDTO practiceSetupDTO) {
+      System.out.println("practiceSetupDTO = " + practiceSetupDTO);
+      Practice practice = practiceService.setupPractice(practiceSetupDTO);
+      return ResponseEntity.ok(practice.getPracticeID());
    }
 
    /**
@@ -28,11 +32,11 @@ public class PracticeController {
     * @param userId
     * @return
     */
-   @PostMapping("/waiting/{practiceID}")
+   @PostMapping("/waiting/{practiceID}/{userID}")
    public ResponseEntity<Void> addUserToQueue(
-           @PathVariable String practiceID,
-           @RequestParam String userId) {
-      practiceService.addUserToQueue(practiceID, userId);
+           @PathVariable() int practiceID,
+           @PathVariable int userID) {
+      practiceService.addUserToQueue(practiceID, userID);
       return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
    }
 
@@ -44,7 +48,12 @@ public class PracticeController {
            @PathVariable String practiceID,
            @RequestParam String userId,
            @RequestParam String seatId) {
-      return ResponseEntity.ok().build();
+      boolean wasSuccessful = seatService.reserveSeat(practiceID, userId, seatId);
+      if (wasSuccessful) {
+         return ResponseEntity.ok().build();
+      } else {
+         return ResponseEntity.status(HttpStatus.CONFLICT).build();  // 예: 충돌 상태 코드를 사용하여 예매 실패를 나타냅니다.
+      }
    }
 
    /*
