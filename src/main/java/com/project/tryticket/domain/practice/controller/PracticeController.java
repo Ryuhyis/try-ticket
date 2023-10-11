@@ -1,6 +1,7 @@
 package com.project.tryticket.domain.practice.controller;
 
 import com.project.tryticket.domain.practice.dto.PracticeSetupDTO;
+import com.project.tryticket.domain.practice.entity.Practice;
 import com.project.tryticket.domain.practice.service.PracticeService;
 import com.project.tryticket.domain.seat.SeatService;
 import lombok.RequiredArgsConstructor;
@@ -19,9 +20,10 @@ public class PracticeController {
     * 연습 티켓팅 세팅
     */
    @PostMapping("/setting")
-   public ResponseEntity<Void> setupPractice(@RequestBody PracticeSetupDTO practiceSetupDTO) {
-      practiceService.setupPractice(practiceSetupDTO);
-      return ResponseEntity.ok().build();
+   public ResponseEntity<Long> setupPractice(@RequestBody PracticeSetupDTO practiceSetupDTO) {
+      System.out.println("practiceSetupDTO = " + practiceSetupDTO);
+      Practice practice = practiceService.setupPractice(practiceSetupDTO);
+      return ResponseEntity.ok(practice.getPracticeID());
    }
 
    /**
@@ -30,11 +32,11 @@ public class PracticeController {
     * @param userId
     * @return
     */
-   @PostMapping("/waiting/{practiceID}")
+   @PostMapping("/waiting/{practiceID}/{userID}")
    public ResponseEntity<Void> addUserToQueue(
-           @PathVariable String practiceID,
-           @RequestParam String userId) {
-      practiceService.addUserToQueue(practiceID, userId);
+           @PathVariable() int practiceID,
+           @PathVariable int userID) {
+      practiceService.addUserToQueue(practiceID, userID);
       return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
    }
 

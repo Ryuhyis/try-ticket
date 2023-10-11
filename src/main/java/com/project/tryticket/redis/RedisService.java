@@ -23,6 +23,7 @@ public class RedisService {
    public void addVirtualUsersToWaitingList(String eventId, int numberOfUsers) {
       for (int i = 0; i < numberOfUsers; i++) {
          double score = System.currentTimeMillis() - new Random().nextInt(10000); // 예: 랜덤한 시간으로 score 설정
+         System.out.println("virtualuser " + i + " : score");
          redisTemplate.opsForZSet().add("waiting:" + eventId, "virtualUser" + i, score);
       }
    }
@@ -32,7 +33,7 @@ public class RedisService {
     * @param eventId
     * @param userId
     */
-   public void addUserToQueue(String eventId, String userId) {
+   public void addUserToQueue(int eventId, int userId) {
       double score = System.currentTimeMillis();
       redisTemplate.opsForZSet().add("waiting:" + eventId, userId, score);
    }
